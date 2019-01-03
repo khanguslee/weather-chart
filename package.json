@@ -1,0 +1,22 @@
+{
+  "name": "weather-chart",
+  "version": "1.0.0",
+  "description": "Spike program to learn how to use d3.js",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khanguslee/weather-chart.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/khanguslee/weather-chart/issues"
+  },
+  "homepage": "https://github.com/khanguslee/weather-chart#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
