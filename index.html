@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="stylesheet" type="text/css" href="index.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
 </head>
 
 <body>
@@ -9,6 +11,7 @@
         <div class='row'>
             <h1>Weather</h1>
         </div>
+         
         <div class='row'>
             <form class='form-inline' onsubmit="submitCity();return false">
                 <div class='form-group mr-2'>
@@ -17,6 +20,10 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
+        </div>
+
+        <div class='row'>
+            <svg></svg>
         </div>
     </div>
 

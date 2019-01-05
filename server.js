@@ -26,6 +26,11 @@ app.get('/index.js', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.js'));
 });
 
+app.get('/index.css', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.css'));
+});
+
+
 // Endpoint to get weather forecase for a city
 app.get('/weather/:cityName', (req, res) => {
     const forecastURL = openWeatherMapBaseURL + '/forecast?q=' + req.params.cityName + '&mode=json&APPID=' + API_KEY;
