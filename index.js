@@ -1,3 +1,5 @@
+var socket = io();
+
 function kelvinToCelsius(inputTemperature) {
     celsiusTemperature = inputTemperature - 273.15;
     return celsiusTemperature
@@ -55,25 +57,32 @@ function submitCity() {
 
         // Create overall chart
         var margin = {top: 20, right: 20, bottom: 150, left:50};
-        var svgWidth = 1000 - margin.left - margin.right;
-        var svgHeight = 600 - margin.top - margin.bottom;
+        var svgWidth = 1000;
+        var svgHeight = 600;
+        let chartWidth = svgWidth - margin.left - margin.right;
+        let chartHeight = svgHeight - margin.top - margin.bottom;
         d3.select('svg').selectAll('rect').remove();
         d3.select('svg').selectAll('g').remove();
 
         var svg = d3.select('svg')
-            .attr("width", svgWidth + margin.left + margin.right)
-            .attr("height", svgHeight + margin.top + margin.bottom)
-            .attr("class", "bar-chart");
+            .attr("width", svgWidth)
+            .attr("height", svgHeight)
+            .attr("class", "bar-chart")
+            .on('click', () => {
+                // Get the  x position of the mouse when user clicks on d3 chart
+                socket.emit('x position', event.clientX);
+                console.log(event.clientX);
+            });
         
         // Define y axis
         const yScale = d3.scaleLinear()
-            .range([svgHeight, 0])
+            .range([chartHeight, 0])
             .domain([0, d3.max(celsiusTemperatureArray) + 10]);
 
         // Define x axis
         const xScale = d3.scaleTime()
             .domain(d3.extent(timeDataArray))
-            .range([0, svgWidth]);
+            .range([0, chartWidth]);
 
         // Create both axes
         var chart = svg.append('g')
@@ -84,7 +93,7 @@ function submitCity() {
 
         chart.append('g')
             .attr('class', 'axis')
-            .attr('transform', `translate(0, ${svgHeight})`)
+            .attr('transform', `translate(0, ${chartHeight})`)
             .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%Y-%m-%d %H:%M:%S")))
             .selectAll('text')
             .style("text-anchor", "end")
@@ -92,7 +101,7 @@ function submitCity() {
             .attr("dy", ".15em")
             .attr("transform", "rotate(-65)");
 
-        // Create each individual bar for each data point
+        // Create line chart
         var valueline = d3.line()
             .x(function(d) { return xScale(d.time); })
             .y(function(d) { return yScale(d.temperature); });
@@ -105,3 +114,4 @@ function submitCity() {
         console.log(data);
     })
 }
+
