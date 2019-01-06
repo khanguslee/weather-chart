@@ -29,6 +29,34 @@ function storeTimeAndWeatherData(inputTimeArray, inputWeatherData) {
     return outputData
 }
 
+function pointerPosition(xPosition, show) {
+    let markerPointer = d3.select('#marker-pointer');
+    markerPointer
+          .attr("x1", xPosition)
+          .attr("x2", xPosition)
+    if(show) {
+        markerPointer.classed("hidden", false)
+    }
+}
+
+function mouseClick() {
+    // Get the  x position of the mouse when user clicks on d3 chart
+    socket.emit('x position', event.clientX);
+    console.log(event.clientX);
+}
+
+function mouseOver() {
+    pointerPosition(event.clientX, true);
+}
+
+function mouseMove() {
+    pointerPosition(event.clientX);
+}
+
+function mouseOut() {
+    d3.select('#marker-pointer').classed("hidden", true)
+}
+
 function submitCity() {
     let inputCity = document.getElementById('inputCityName').value;
 
@@ -68,11 +96,10 @@ function submitCity() {
             .attr("width", svgWidth)
             .attr("height", svgHeight)
             .attr("class", "bar-chart")
-            .on('click', () => {
-                // Get the  x position of the mouse when user clicks on d3 chart
-                socket.emit('x position', event.clientX);
-                console.log(event.clientX);
-            });
+            .on('click', mouseClick)
+            .on("mouseover", mouseOver)
+            .on("mousemove", mouseMove)
+            .on("mouseout", mouseOut);
         
         // Define y axis
         const yScale = d3.scaleLinear()

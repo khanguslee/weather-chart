@@ -5,3 +5,19 @@
   stroke: steelblue;
   stroke-width: 2px;
 }
+
+#marker-svg {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    pointer-events: none;
+}
+
+#marker-pointer {
+    fill: none;
+    stroke: black;
+    stroke-linecap: butt;
+    stroke-width: 1;
+}
