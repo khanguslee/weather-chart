@@ -49,27 +49,49 @@ app.get('/weather/:cityName', (req, res) => {
 // TODO: Replace this with a database instead
 var storedMarkers = {};
 
+function isMarkerAdded(inputMarkerArray, inputMarker) {
+    for(let index = 0; index< inputMarkerArray.length; index++) {
+        let currentMarker = inputMarkerArray[index];
+        if (inputMarker.time == currentMarker.time) return true;
+    }
+    return false
+}
+
+function removeMarker(inputMarkerArray, inputMarker) {
+    for(let index = 0; index< inputMarkerArray.length; index++) {
+        let currentMarker = inputMarkerArray[index];
+        if (inputMarker.time == currentMarker.time) {
+            inputMarkerArray.pop(index);
+        }
+    }
+}
+
 io.on('connection', (socket) => {
     console.log('User connected');
 
     socket.on('New Marker', (message) => {
-        console.log('User ' + message.username + ' placed marker at ' + message.time + ' with temperature ' + message.temperature);
         // Store markers
         // TODO: Markers to store username as well
         if (!(message.city in storedMarkers)) {
-            storedMarkers[message.city] = [message.time];
+            storedMarkers[message.city] = [message];
         } else {
             let cityMarkers = storedMarkers[message.city];
             // Only add marker if it has not been added yet
-            if (!cityMarkers.includes(message.time)) {
-                cityMarkers.push(message.time);
+            if (!isMarkerAdded(cityMarkers, message)) {
+                cityMarkers.push(message);
                 storedMarkers[message.city] = cityMarkers;
+            } else {
+                removeMarker(cityMarkers, message);
+                socket.emit('Remove Marker');
+                console.log('User ' + message.username + ' removed marker at ' + message.time + ' with temperature ' + message.temperature);
+                return;
             }
         }
-
+        
         // Send to everyone in the room
-        socket.emit('Generate Marker', message.time);
-        socket.to(message.city).emit('Generate Marker', message.time);
+        console.log('User ' + message.username + ' placed marker at ' + message.time + ' with temperature ' + message.temperature);
+        socket.emit('Generate Marker', message);
+        socket.to(message.city).emit('Generate Marker', message);
 
         console.log(storedMarkers);
     })

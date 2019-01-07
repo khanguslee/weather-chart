@@ -171,11 +171,14 @@ function submitCity() {
 
 socket.on('Generate Marker', (marker) => {
     let strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
-    let xPosition = xScale(strictIsoParse(marker));
-    console.log(xPosition);
+    let xPosition = xScale(strictIsoParse(marker.time));
+    let username = marker.username;
+    if (marker.username == '') {
+        username = 'Marker';
+    }
     let annotation = [{
         note: {
-            title: 'Marker'
+            title: username
         },
         x: xPosition + 50,
         y: 600 - 150,
@@ -191,4 +194,10 @@ socket.on('Generate Marker', (marker) => {
           .append("g")
           .attr("class", "annotation-group")
           .call(makeAnnotations);
+})
+
+socket.on('Remove Marker', () => {
+    d3.select('svg').selectAll('.annotation-group').remove();
+    let inputCity = document.getElementById('inputCityName').value.toLowerCase();
+    socket.emit('Query Markers', inputCity);
 })
