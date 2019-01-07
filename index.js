@@ -39,12 +39,6 @@ function pointerPosition(xPosition, show) {
     }
 }
 
-function mouseClick() {
-    // Get the  x position of the mouse when user clicks on d3 chart
-    socket.emit('x position', event.clientX);
-    console.log(event.clientX);
-}
-
 function mouseOver() {
     pointerPosition(event.clientX, true);
 }
@@ -58,7 +52,7 @@ function mouseOut() {
 }
 
 function submitCity() {
-    let inputCity = document.getElementById('inputCityName').value;
+    let inputCity = document.getElementById('inputCityName').value.toLowerCase();
 
     // Check for no inputted city
     if (inputCity == '') {
@@ -71,6 +65,23 @@ function submitCity() {
         return response.json();
     })
     .then((jsonData) => {
+        function mouseClick() {
+            // Get the  x position of the mouse when user clicks on d3 chart
+            // TODO: Create default username if user hasn't supplied?
+            let username = document.getElementById('room-username').value;
+            
+            // Getting the corresponding temperature and time values
+            // TODO: Increase accuracy of below values (Off by a few pixels)
+            // clickedTemperature does not correspond to the data point value
+            let clickedTemperature = yScale.invert(d3.mouse(document.getElementById('y-axis'))[1]);
+            let clickedTime = xScale.invert(d3.mouse(document.getElementById('x-axis'))[0]);
+            
+            // Emit message to send to server
+            let message = {'username': username, temperature: clickedTemperature, time: clickedTime};
+            socket.emit('New Marker', message);
+            console.log(message);
+        }
+
         // Convert data to suitable format
         console.log(jsonData);
         let weatherDataArray = jsonData.list;
@@ -92,15 +103,6 @@ function submitCity() {
         d3.select('svg').selectAll('rect').remove();
         d3.select('svg').selectAll('g').remove();
 
-        var svg = d3.select('svg')
-            .attr("width", svgWidth)
-            .attr("height", svgHeight)
-            .attr("class", "bar-chart")
-            .on('click', mouseClick)
-            .on("mouseover", mouseOver)
-            .on("mousemove", mouseMove)
-            .on("mouseout", mouseOut);
-        
         // Define y axis
         const yScale = d3.scaleLinear()
             .range([chartHeight, 0])
@@ -111,15 +113,27 @@ function submitCity() {
             .domain(d3.extent(timeDataArray))
             .range([0, chartWidth]);
 
+        var svg = d3.select('svg')
+            .attr("width", svgWidth)
+            .attr("height", svgHeight)
+            .attr("class", "bar-chart")
+            .on('click', mouseClick)
+            .on("mouseover", mouseOver)
+            .on("mousemove", mouseMove)
+            .on("mouseout", mouseOut);
+
         // Create both axes
         var chart = svg.append('g')
             .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
         chart.append('g')
+            .attr('class', 'axis')
+            .attr('id', 'y-axis')
             .call(d3.axisLeft(yScale));
 
         chart.append('g')
             .attr('class', 'axis')
+            .attr('id', 'x-axis')
             .attr('transform', `translate(0, ${chartHeight})`)
             .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%Y-%m-%d %H:%M:%S")))
             .selectAll('text')
@@ -139,6 +153,10 @@ function submitCity() {
             .attr("d", valueline);
 
         console.log(data);
+    })
+    .catch((error) => {
+        // TODO: Notify user that there was an error searching for the specified city
+        return false
     })
 }
 

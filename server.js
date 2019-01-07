@@ -48,7 +48,7 @@ app.get('/weather/:cityName', (req, res) => {
 
 io.on('connection', (socket) => {
     console.log('User connected');
-    socket.on('x position', (message) => {
-        console.log('Client clicked: ' + message);
+    socket.on('New Marker', (message) => {
+        console.log('User ' + message.username + ' placed marker at ' + message.time + ' with temperature ' + message.temperature);
     })
 })

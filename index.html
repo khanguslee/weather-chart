@@ -14,17 +14,28 @@
         </div>
          
         <div class='row'>
-            <form class='form-inline' onsubmit="submitCity();return false">
-                <div class='form-group mr-2'>
-                    <label for="inputCityName">City Name</label>
-                    <input type="text" class="form-control ml-2" id="inputCityName" placeholder="Enter a city">
+            <div class='col'>
+                <form class='form-inline' onsubmit="submitCity();return false">
+                        <div class='form-group mr-2'>
+                            <label for="inputCityName">City Name</label>
+                            <input type="text" class="form-control ml-2" id="inputCityName" placeholder="Enter a city">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+
+            <div class='col-4'>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="room-username-label">Username</span>
+                    </div>
+                    <input type="text" class="form-control" id='room-username' placeholder="Enter a username" aria-label="Username" aria-describedby="room-username-label">
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
+            </div>
         </div>
 
         <div class='row'>
-            <svg></svg>
+            <svg id='weather-chart'></svg>
             <svg id="marker-svg">
                 <line x1="0" y1="-1%" x2="0" y2="102%" id="marker-pointer" class="hidden" />
             </svg>
