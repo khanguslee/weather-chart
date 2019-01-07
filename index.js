@@ -77,12 +77,10 @@ function submitCity() {
             // clickedTemperature does not correspond to the data point value
             let clickedTemperature = yScale.invert(d3.mouse(document.getElementById('y-axis'))[1]);
             let clickedTime = xScale.invert(d3.mouse(document.getElementById('x-axis'))[0]);
-            console.log(d3.mouse(document.getElementById('x-axis'))[0]);
-            console.log(clickedTime);
+
             // Emit message to send to server
             let message = {'username': username, temperature: clickedTemperature, time: clickedTime, city: inputCity};
             socket.emit('New Marker', message);
-            console.log(message);
         }
 
         // Convert data to suitable format
@@ -191,13 +189,31 @@ socket.on('Generate Marker', (marker) => {
         .annotations(annotation);
 
     d3.select("svg")
-          .append("g")
-          .attr("class", "annotation-group")
-          .call(makeAnnotations);
+        .append("g")
+        .attr("class", "annotation-group")
+        .call(makeAnnotations)
+        .on('click', () => {
+            // TODO: Add an onclick event to remove marker
+            console.log('Remove marker')
+            console.log(d3.mouse(this))
+        });
+    
+    document.getElementById('clear-markers').style.visibility = 'visible';
 })
 
 socket.on('Remove Marker', () => {
+    // Remove existing annotations
     d3.select('svg').selectAll('.annotation-group').remove();
     let inputCity = document.getElementById('inputCityName').value.toLowerCase();
     socket.emit('Query Markers', inputCity);
 })
+
+function clearMarkers() {
+    document.getElementById('clear-markers').style.visibility = 'hidden';
+    
+    // Tell server to clear all markers in the current room
+    let inputCity = document.getElementById('inputCityName').value.toLowerCase();
+    if (inputCity == '') return;
+    socket.emit('Remove All Markers', inputCity);
+    
+}

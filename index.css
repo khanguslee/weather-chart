@@ -21,3 +21,11 @@
     stroke-linecap: butt;
     stroke-width: 1;
 }
+
+.annotation-connector {
+    stroke-width: 2;
+}
+
+#clear-markers {
+    visibility: hidden;
+}

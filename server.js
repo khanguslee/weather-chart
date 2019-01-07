@@ -49,6 +49,7 @@ app.get('/weather/:cityName', (req, res) => {
 // TODO: Replace this with a database instead
 var storedMarkers = {};
 
+
 function isMarkerAdded(inputMarkerArray, inputMarker) {
     for(let index = 0; index< inputMarkerArray.length; index++) {
         let currentMarker = inputMarkerArray[index];
@@ -81,6 +82,7 @@ io.on('connection', (socket) => {
                 cityMarkers.push(message);
                 storedMarkers[message.city] = cityMarkers;
             } else {
+                // TODO: Hide Clear Markers button if there are no markers left
                 removeMarker(cityMarkers, message);
                 socket.emit('Remove Marker');
                 console.log('User ' + message.username + ' removed marker at ' + message.time + ' with temperature ' + message.temperature);
@@ -115,5 +117,16 @@ io.on('connection', (socket) => {
         for (let index = 0; index < markerArray.length; index++) {
             socket.emit('Generate Marker', markerArray[index]);
         }
+    })
+
+    socket.on('Remove All Markers', (inputRoomName) => {
+        // Check if there are markers stored for this city/room name
+        if (!(inputRoomName in storedMarkers)) {
+            return;
+        }
+
+        // Clear list of markers
+        storedMarkers[inputRoomName] = []
+        socket.emit('Remove Marker');
     })
 })
