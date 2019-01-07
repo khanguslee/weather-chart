@@ -46,9 +46,52 @@ app.get('/weather/:cityName', (req, res) => {
     })
 });
 
+// TODO: Replace this with a database instead
+var storedMarkers = {};
+
 io.on('connection', (socket) => {
     console.log('User connected');
+
     socket.on('New Marker', (message) => {
         console.log('User ' + message.username + ' placed marker at ' + message.time + ' with temperature ' + message.temperature);
+        // Store markers
+        // TODO: Markers to store username as well
+        if (!(message.city in storedMarkers)) {
+            storedMarkers[message.city] = [message.time];
+        } else {
+            let cityMarkers = storedMarkers[message.city];
+            // Only add marker if it has not been added yet
+            if (!cityMarkers.includes(message.time)) {
+                cityMarkers.push(message.time);
+                storedMarkers[message.city] = cityMarkers;
+            }
+        }
+
+        // Send to everyone in the room
+        socket.emit('Generate Marker', message.time);
+        socket.to(message.city).emit('Generate Marker', message.time);
+
+        console.log(storedMarkers);
+    })
+
+    socket.on('Create Room', (inputRoomName) => {
+        // Ensure we only connect to one room at a time
+        for(room in socket.rooms) {
+            // Leave all other rooms apart from your own room (socket.id)
+            if (socket.id !== room) {
+                socket.leave(room);
+            }
+        }
+        socket.join(inputRoomName);
+        console.log('Created room: ' + inputRoomName);
+    })
+
+    socket.on('Query Markers', (inputRoomName) => {
+        if (!(inputRoomName in storedMarkers)) return;
+
+        let markerArray = storedMarkers[inputRoomName];
+        for (let index = 0; index < markerArray.length; index++) {
+            socket.emit('Generate Marker', markerArray[index]);
+        }
     })
 })

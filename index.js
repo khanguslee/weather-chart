@@ -51,6 +51,8 @@ function mouseOut() {
     d3.select('#marker-pointer').classed("hidden", true)
 }
 
+var xScale, yScale;
+
 function submitCity() {
     let inputCity = document.getElementById('inputCityName').value.toLowerCase();
 
@@ -75,9 +77,10 @@ function submitCity() {
             // clickedTemperature does not correspond to the data point value
             let clickedTemperature = yScale.invert(d3.mouse(document.getElementById('y-axis'))[1]);
             let clickedTime = xScale.invert(d3.mouse(document.getElementById('x-axis'))[0]);
-            
+            console.log(d3.mouse(document.getElementById('x-axis'))[0]);
+            console.log(clickedTime);
             // Emit message to send to server
-            let message = {'username': username, temperature: clickedTemperature, time: clickedTime};
+            let message = {'username': username, temperature: clickedTemperature, time: clickedTime, city: inputCity};
             socket.emit('New Marker', message);
             console.log(message);
         }
@@ -104,12 +107,12 @@ function submitCity() {
         d3.select('svg').selectAll('g').remove();
 
         // Define y axis
-        const yScale = d3.scaleLinear()
+        yScale = d3.scaleLinear()
             .range([chartHeight, 0])
             .domain([0, d3.max(celsiusTemperatureArray) + 10]);
 
         // Define x axis
-        const xScale = d3.scaleTime()
+        xScale = d3.scaleTime()
             .domain(d3.extent(timeDataArray))
             .range([0, chartWidth]);
 
@@ -153,6 +156,12 @@ function submitCity() {
             .attr("d", valueline);
 
         console.log(data);
+
+        // Create room to join
+        socket.emit('Create Room', inputCity);
+
+        // Query server of any markers saved
+        socket.emit('Query Markers', inputCity);
     })
     .catch((error) => {
         // TODO: Notify user that there was an error searching for the specified city
@@ -160,3 +169,26 @@ function submitCity() {
     })
 }
 
+socket.on('Generate Marker', (marker) => {
+    let strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
+    let xPosition = xScale(strictIsoParse(marker));
+    console.log(xPosition);
+    let annotation = [{
+        note: {
+            title: 'Marker'
+        },
+        x: xPosition + 50,
+        y: 600 - 150,
+        dy: -(600 - 200),
+        dx: 0
+    }];
+
+    const makeAnnotations = d3.annotation()
+        .type(d3.annotationLabel)
+        .annotations(annotation);
+
+    d3.select("svg")
+          .append("g")
+          .attr("class", "annotation-group")
+          .call(makeAnnotations);
+})
