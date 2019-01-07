@@ -171,6 +171,10 @@ socket.on('Generate Marker', (marker) => {
     let strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
     let xPosition = xScale(strictIsoParse(marker.time));
     let username = marker.username;
+    if (!('markerColour' in marker)) {
+        marker.markerColour = 'grey';
+    }
+    
     if (marker.username == '') {
         username = 'Marker';
     }
@@ -181,9 +185,9 @@ socket.on('Generate Marker', (marker) => {
         x: xPosition + 50,
         y: 600 - 150,
         dy: -(600 - 200),
-        dx: 0
+        dx: 0,
+        color: marker.markerColour
     }];
-
     const makeAnnotations = d3.annotation()
         .type(d3.annotationLabel)
         .annotations(annotation);
@@ -197,7 +201,6 @@ socket.on('Generate Marker', (marker) => {
             console.log('Remove marker')
             console.log(d3.mouse(this))
         });
-    
     document.getElementById('clear-markers').style.visibility = 'visible';
 })
 

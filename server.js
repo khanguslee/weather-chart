@@ -48,7 +48,7 @@ app.get('/weather/:cityName', (req, res) => {
 
 // TODO: Replace this with a database instead
 var storedMarkers = {};
-
+var storedUsers = {};
 
 function isMarkerAdded(inputMarkerArray, inputMarker) {
     for(let index = 0; index< inputMarkerArray.length; index++) {
@@ -67,12 +67,17 @@ function removeMarker(inputMarkerArray, inputMarker) {
     }
 }
 
+function createRandomHEXString() {
+    // Create a random RGB value
+    return '#' + Math.random().toString().slice(2,8);
+}
+
 io.on('connection', (socket) => {
     console.log('User connected');
 
     socket.on('New Marker', (message) => {
+        let outputMessage = message;
         // Store markers
-        // TODO: Markers to store username as well
         if (!(message.city in storedMarkers)) {
             storedMarkers[message.city] = [message];
         } else {
@@ -89,11 +94,17 @@ io.on('connection', (socket) => {
                 return;
             }
         }
-        
+
+        // Store a colour for that user
+        if ((message.username != '') && !(message.username in storedUsers)) {
+            storedUsers[message.username] = createRandomHEXString();
+        }
+        outputMessage.markerColour = storedUsers[message.username];
+
         // Send to everyone in the room
         console.log('User ' + message.username + ' placed marker at ' + message.time + ' with temperature ' + message.temperature);
-        socket.emit('Generate Marker', message);
-        socket.to(message.city).emit('Generate Marker', message);
+        socket.emit('Generate Marker', outputMessage);
+        socket.to(message.city).emit('Generate Marker', outputMessage);
 
         console.log(storedMarkers);
     })
