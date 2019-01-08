@@ -30,6 +30,7 @@ function storeTimeAndWeatherData(inputTimeArray, inputWeatherData) {
 }
 
 function pointerPosition(xPosition, username, isCurrentUser=true) {
+    // Change position of marker
     let markerPointer = d3.select('#current-user-marker');
     if (!isCurrentUser) {
         markerPointer = d3.select('#' + username + '-marker');
@@ -38,6 +39,16 @@ function pointerPosition(xPosition, username, isCurrentUser=true) {
           .attr("x1", xPosition)
           .attr("x2", xPosition)
     markerPointer.classed("hidden", false);
+
+    // Change position of name
+    let markerPointerText = d3.select('#current-user-marker-text');
+    if (!isCurrentUser) {
+        markerPointerText = d3.select('#' + username + '-marker-text');
+    }
+    markerPointerText
+        .attr('x', xPosition + 10);
+
+    markerPointerText.classed('hidden', false);
 }
 
 function mouseOver() {
@@ -59,7 +70,8 @@ function mouseMove() {
 }
 
 function mouseOut() {
-    d3.select('#current-user-marker').classed("hidden", true)
+    d3.select('#current-user-marker').classed("hidden", true);
+    d3.select('#current-user-marker-text').classed("hidden", true);
 }
 
 var xScale, yScale;
@@ -229,9 +241,16 @@ socket.on('Render User Position', (message) => {
     if (userMarker == null) {
         let originalMarker = document.getElementById('original-marker').cloneNode(true);
         originalMarker.id = '';
-        let lineElement = originalMarker.childNodes[1]
+        // Edit line element
+        let lineElement = originalMarker.childNodes[1];
         lineElement.id = userMarkerID;
         lineElement.style.stroke = message.colour;
+
+        // Edit text element
+        let textElement = originalMarker.childNodes[3];
+        textElement.id = message.username + '-marker-text';
+        textElement.textContent = message.username; 
+        textElement.style.stroke = message.colour;
         document.getElementById('marker-div').appendChild(originalMarker);
     }
     let strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
