@@ -49,7 +49,6 @@ app.get('/weather/:cityName', (req, res) => {
 // TODO: Replace this with a database instead
 var storedMarkers = {};
 var storedUsers = {};
-var storedMousePosition = {};
 
 function isMarkerAdded(inputMarkerArray, inputMarker) {
     for(let index = 0; index< inputMarkerArray.length; index++) {
@@ -98,17 +97,21 @@ io.on('connection', (socket) => {
         }
 
         // Store a colour for that user
-        if ((message.username != '') && !(message.username in storedUsers)) {
-            storedUsers[message.username] = createRandomHEXString();
+        if (message.username != '') {
+            if (!(socket.id in storedUsers)) {
+                // New user
+                storedUsers[socket.id] = {'colour': createRandomHEXString(), 'username': message.username};
+            } else if (storedUsers[socket.id].username  != message.username) {
+                // Username changed
+                storedUsers[socket.id].username = message.username;
+            }
+            outputMessage.markerColour = storedUsers[socket.id].colour;
         }
-        outputMessage.markerColour = storedUsers[message.username];
 
         // Send to everyone in the room
         console.log('User ' + message.username + ' placed marker at ' + message.time + ' with temperature ' + message.temperature);
         socket.emit('Generate Marker', outputMessage);
         socket.to(message.city).emit('Generate Marker', outputMessage);
-
-        console.log(storedMarkers);
     })
 
     socket.on('Create Room', (inputRoomName) => {
@@ -148,11 +151,19 @@ io.on('connection', (socket) => {
 
     socket.on('Update User Position', (message) => {
         let outputMessage = message;
-        if ((message.username != '') && !(message.username in storedUsers)) {
-            storedUsers[message.username] = createRandomHEXString();
+        if ((message.username != '') && !(socket.id in storedUsers)) {
+            // New user
+            storedUsers[socket.id] = {'colour': createRandomHEXString(), 'username': message.username};
+        } else if (storedUsers[socket.id].username  != message.username) {
+            // Username changed
+            storedUsers[socket.id].username = message.username;
         }
 
-        outputMessage.colour = storedUsers[message.username];
+        outputMessage.colour = storedUsers[socket.id].colour;
         socket.to(message.roomName).emit('Render User Position', outputMessage);
+    })
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
     })
 })
