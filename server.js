@@ -91,6 +91,7 @@ io.on('connection', (socket) => {
                 // TODO: Hide Clear Markers button if there are no markers left
                 removeMarker(cityMarkers, message);
                 socket.emit('Remove Marker');
+                socket.to(message.city).emit('Remove Marker');
                 console.log('User ' + message.username + ' removed marker at ' + message.time + ' with temperature ' + message.temperature);
                 return;
             }
@@ -144,7 +145,7 @@ io.on('connection', (socket) => {
         // TODO: Option to disable this?
         socket.to(inputRoomName).emit('Remove Marker');
     })
-    
+
     socket.on('Update User Position', (message) => {
         let outputMessage = message;
         if ((message.username != '') && !(message.username in storedUsers)) {
