@@ -254,7 +254,7 @@ socket.on('Render User Position', (message) => {
         document.getElementById('marker-div').appendChild(originalMarker);
     }
     let strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
-    let xPosition = xScale(strictIsoParse(message.xPosition)) + document.getElementById('x-axis').getBoundingClientRect().x;
+    let xPosition = xScale(strictIsoParse(message.xPosition)) + document.getElementById('x-axis').getBoundingClientRect().x + 10;
     pointerPosition(xPosition, message.username, false);
 })
 
