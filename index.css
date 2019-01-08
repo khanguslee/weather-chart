@@ -6,7 +6,7 @@
   stroke-width: 2px;
 }
 
-#marker-svg {
+.marker-svg {
     position: absolute;
     width: 100%;
     left: 0;
@@ -15,11 +15,11 @@
     pointer-events: none;
 }
 
-#marker-pointer {
+.marker-pointer {
     fill: none;
     stroke: black;
     stroke-linecap: butt;
-    stroke-width: 1;
+    stroke-width: 2px;
 }
 
 .annotation-connector {

@@ -29,26 +29,37 @@ function storeTimeAndWeatherData(inputTimeArray, inputWeatherData) {
     return outputData
 }
 
-function pointerPosition(xPosition, show) {
-    let markerPointer = d3.select('#marker-pointer');
+function pointerPosition(xPosition, username, isCurrentUser=true) {
+    let markerPointer = d3.select('#current-user-marker');
+    if (!isCurrentUser) {
+        markerPointer = d3.select('#' + username + '-marker');
+    }
     markerPointer
           .attr("x1", xPosition)
           .attr("x2", xPosition)
-    if(show) {
-        markerPointer.classed("hidden", false)
-    }
+    markerPointer.classed("hidden", false);
 }
 
 function mouseOver() {
-    pointerPosition(event.clientX, true);
+    let username = document.getElementById('room-username').value.trim();
+    pointerPosition(event.clientX, username);
 }
 
 function mouseMove() {
-    pointerPosition(event.clientX);
+    let username = document.getElementById('room-username').value.trim();
+    pointerPosition(event.clientX, username);
+    // Tell server the mouse position of user
+    // Don't emit mouse position if there username is not specified
+    if (username == '') return;
+
+    let inputCity = document.getElementById('inputCityName').value.toLowerCase();
+    let mouseXPosition = xScale.invert(d3.mouse(document.getElementById('x-axis'))[0]);
+    let outputMessage = {'username': username, 'roomName': inputCity, 'xPosition': mouseXPosition};
+    socket.emit('Update User Position', outputMessage);
 }
 
 function mouseOut() {
-    d3.select('#marker-pointer').classed("hidden", true)
+    d3.select('#current-user-marker').classed("hidden", true)
 }
 
 var xScale, yScale;
@@ -70,7 +81,7 @@ function submitCity() {
         function mouseClick() {
             // Get the  x position of the mouse when user clicks on d3 chart
             // TODO: Create default username if user hasn't supplied?
-            let username = document.getElementById('room-username').value;
+            let username = document.getElementById('room-username').value.trim();
             
             // Getting the corresponding temperature and time values
             // TODO: Increase accuracy of below values (Off by a few pixels)
@@ -211,6 +222,23 @@ socket.on('Remove Marker', () => {
     socket.emit('Query Markers', inputCity);
 })
 
+socket.on('Render User Position', (message) => {
+    let userMarkerID = message.username + '-marker';
+    let userMarker = document.getElementById(userMarkerID);
+    // Clone line element if it does not exist
+    if (userMarker == null) {
+        let originalMarker = document.getElementById('original-marker').cloneNode(true);
+        originalMarker.id = '';
+        let lineElement = originalMarker.childNodes[1]
+        lineElement.id = userMarkerID;
+        lineElement.style.stroke = message.colour;
+        document.getElementById('marker-div').appendChild(originalMarker);
+    }
+    let strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
+    let xPosition = xScale(strictIsoParse(message.xPosition)) + document.getElementById('x-axis').getBoundingClientRect().x;
+    pointerPosition(xPosition, message.username, false);
+})
+
 function clearMarkers() {
     document.getElementById('clear-markers').style.visibility = 'hidden';
     
@@ -220,3 +248,4 @@ function clearMarkers() {
     socket.emit('Remove All Markers', inputCity);
     
 }
+

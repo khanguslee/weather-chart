@@ -11,7 +11,7 @@
 <body>
     <div class='container'>
         <div class='row'>
-            <h1>Weather</h1>
+            <h1>5-Day Weather Forecast</h1>
         </div>
          
         <div class='row'>
@@ -42,9 +42,15 @@
 
         <div class='row'>
             <svg id='weather-chart'></svg>
-            <svg id="marker-svg">
-                <line x1="0" y1="-1%" x2="0" y2="102%" id="marker-pointer" class="hidden" />
-            </svg>
+            <div id='marker-div'>
+                <svg class="marker-svg" id='original-marker'>
+                    <line x1="0" y1="-1%" x2="0" y2="102%" class="hidden marker-pointer" />
+                </svg>
+
+                <svg class="marker-svg">
+                    <line x1="0" y1="-1%" x2="0" y2="102%" class="hidden marker-pointer" id='current-user-marker'/>
+                </svg>
+            </div>
         </div>
     </div>
 

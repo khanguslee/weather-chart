@@ -49,6 +49,7 @@ app.get('/weather/:cityName', (req, res) => {
 // TODO: Replace this with a database instead
 var storedMarkers = {};
 var storedUsers = {};
+var storedMousePosition = {};
 
 function isMarkerAdded(inputMarkerArray, inputMarker) {
     for(let index = 0; index< inputMarkerArray.length; index++) {
@@ -139,5 +140,18 @@ io.on('connection', (socket) => {
         // Clear list of markers
         storedMarkers[inputRoomName] = []
         socket.emit('Remove Marker');
+        // Tell other users in the room to remove their markers too
+        // TODO: Option to disable this?
+        socket.to(inputRoomName).emit('Remove Marker');
+    })
+    
+    socket.on('Update User Position', (message) => {
+        let outputMessage = message;
+        if ((message.username != '') && !(message.username in storedUsers)) {
+            storedUsers[message.username] = createRandomHEXString();
+        }
+
+        outputMessage.colour = storedUsers[message.username];
+        socket.to(message.roomName).emit('Render User Position', outputMessage);
     })
 })
